@@ -26,9 +26,9 @@ spec:
       containers:
         - name: frontend
           # Replaced by sed in the Jenkinsfile pipeline:
-          # sed -i 's|DOCKERHUB_USER|'$DOCKERHUB_USER'|g'
+          # sed -i 's|bunnyistekken|'$bunnyistekken'|g'
           # sed -i 's|IMAGE_TAG|'$IMAGE_TAG'|g'
-          image: DOCKERHUB_USER/hackathon-frontend:IMAGE_TAG
+          image: bunnyistekken/hackathon-frontend:IMAGE_TAG
           imagePullPolicy: Always
           ports:
             - containerPort: 80
