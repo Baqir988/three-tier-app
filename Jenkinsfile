@@ -4,7 +4,7 @@ pipeline {
     // ─── Environment ────────────────────────────────────────────────────────────
     environment {
         // Your Docker Hub username – change this to your actual username
-        DOCKERHUB_USER  = 'your-dockerhub-username'
+        DOCKERHUB_USER  = 'bunnyistekken'
 
         FRONTEND_IMAGE  = "${DOCKERHUB_USER}/hackathon-frontend"
         BACKEND_IMAGE   = "${DOCKERHUB_USER}/hackathon-backend"
