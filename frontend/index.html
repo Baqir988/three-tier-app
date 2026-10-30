@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hackathon Event Management System</title>
+  <style>
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #111827;
+      --bg-card: #1a2236;
+      --accent-primary: #6c63ff;
+      --accent-secondary: #00d4ff;
+      --accent-danger: #ff4757;
+      --accent-success: #2ed573;
+      --text-primary: #e8eaf6;
+      --text-secondary: #8892b0;
+      --border: #2a3550;
+      --shadow: 0 8px 32px rgba(108, 99, 255, 0.15);
+      --font: 'Inter', system-ui, sans-serif;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.08) 0%, transparent 50%),
+                  radial-gradient(ellipse at 80% 80%, rgba(0,212,255,0.06) 0%, transparent 50%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 3rem 2rem;
+      background: linear-gradient(135deg, rgba(108,99,255,0.12) 0%, rgba(0,212,255,0.08) 100%);
+      border: 1px solid rgba(108,99,255,0.25);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-primary));
+      background-size: 200% auto;
+      border-radius: 20px;
+      z-index: -1;
+      animation: gradientShift 4s linear infinite;
+      opacity: 0.3;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .header-icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 0%, var(--accent-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 400;
+    }
+
+    /* Status bar */
+    #status-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      background: rgba(46,213,115,0.1);
+      border: 1px solid rgba(46,213,115,0.3);
+      border-radius: 50px;
+      font-size: 0.8rem;
+      color: var(--accent-success);
+      width: fit-content;
+      margin: 1rem auto 0;
+      transition: all 0.3s ease;
+    }
+
+    #status-bar.error {
+      background: rgba(255,71,87,0.1);
+      border-color: rgba(255,71,87,0.3);
+      color: var(--accent-danger);
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Grid layout */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.8rem; }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      transition: border-color 0.3s ease;
+    }
+
+    .card:hover { border-color: rgba(108,99,255,0.4); }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .card-title-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    input, textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      color: var(--text-primary);
+      font-family: var(--font);
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent-primary);
+      background: rgba(108,99,255,0.06);
+      box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: rgba(136,146,176,0.5);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 10px;
+      font-family: var(--font);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn:hover::before { left: 100%; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), #8b83ff);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(108,99,255,0.4);
+    }
+
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-danger {
+      background: rgba(255,71,87,0.15);
+      color: var(--accent-danger);
+      border: 1px solid rgba(255,71,87,0.3);
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-danger:hover {
+      background: rgba(255,71,87,0.25);
+      border-color: var(--accent-danger);
+      transform: scale(1.05);
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      z-index: 999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      max-width: 320px;
+    }
+
+    #toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    #toast.success {
+      background: rgba(46,213,115,0.15);
+      border: 1px solid rgba(46,213,115,0.4);
+      color: var(--accent-success);
+    }
+
+    #toast.error {
+      background: rgba(255,71,87,0.15);
+      border: 1px solid rgba(255,71,87,0.4);
+      color: var(--accent-danger);
+    }
+
+    /* Teams list */
+    .teams-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .team-count {
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.3);
+      color: var(--accent-primary);
+      border-radius: 50px;
+      padding: 0.2rem 0.8rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .teams-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: 520px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .team-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: all 0.3s ease;
+      animation: slideIn 0.4s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .team-item:hover {
+      border-color: rgba(108,99,255,0.3);
+      background: rgba(108,99,255,0.04);
+    }
+
+    .team-info { flex: 1; min-width: 0; }
+
+    .team-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.4rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .team-members {
+      font-size: 0.8rem;
+      color: var(--accent-secondary);
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .team-idea {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .team-meta {
+      font-size: 0.7rem;
+      color: rgba(136,146,176,0.5);
+      margin-top: 0.5rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.4;
+    }
+
+    .empty-state p { font-size: 0.9rem; }
+
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(108,99,255,0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(108,99,255,0.1);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="header-icon">🚀</span>
+      <h1>Hackathon Event Management</h1>
+      <p>Register your team, showcase your project idea, and compete!</p>
+      <div id="status-bar">
+        <span class="status-dot"></span>
+        <span id="status-text">Connecting to API...</span>
+      </div>
+    </header>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-teams">0</div>
+        <div class="stat-label">Teams Registered</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-members">0</div>
+        <div class="stat-label">Total Members</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-projects">0</div>
+        <div class="stat-label">Project Ideas</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Registration Form -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-icon">📝</div>
+          Register Your Team
+        </div>
+        <form id="register-form">
+          <div class="form-group">
+            <label for="team-name">Team Name</label>
+            <input type="text" id="team-name" name="team_name" placeholder="e.g. Code Ninjas" required maxlength="100" />
+          </div>
+          <div class="form-group">
+            <label for="members">Team Members</label>
+            <input type="text" id="members" name="members" placeholder="e.g. Alice, Bob, Charlie" required maxlength="500" />
+          </div>
+          <div class="form-group">
+            <label for="project-idea">Project Idea</label>
+            <textarea id="project-idea" name="project_idea" placeholder="Describe your innovative project idea..." required maxlength="1000"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" id="submit-btn">
+            <span>🚀</span>
+            <span id="submit-text">Register Team</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Teams List -->
+      <div class="card">
+        <div class="teams-header">
+          <div class="card-title" style="margin-bottom:0">
+            <div class="card-title-icon">👥</div>
+            Registered Teams
+          </div>
+          <span class="team-count" id="team-count-badge">0 teams</span>
+        </div>
+        <div id="teams-container" class="teams-list">
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const API = '/api';
+    let teams = [];
+
+    // Utility: show toast notification
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `show ${type}`;
+      setTimeout(() => { toast.className = ''; }, 3500);
+    }
+
+    // Update API health status bar
+    async function checkHealth() {
+      try {
+        const res = await fetch(`${API}/health`);
+        if (res.ok) {
+          const statusBar = document.getElementById('status-bar');
+          const statusText = document.getElementById('status-text');
+          statusBar.className = '';
+          statusText.textContent = 'API Connected & Healthy';
+        }
+      } catch {
+        const statusBar = document.getElementById('status-bar');
+        const statusText = document.getElementById('status-text');
+        statusBar.className = 'error';
+        statusText.textContent = 'API Unreachable';
+      }
+    }
+
+    // Compute stats from teams array
+    function updateStats() {
+      const totalTeams = teams.length;
+      const totalMembers = teams.reduce((acc, t) => {
+        return acc + (t.members ? t.members.split(',').map(m => m.trim()).filter(Boolean).length : 0);
+      }, 0);
+      const totalProjects = teams.filter(t => t.project_idea && t.project_idea.trim()).length;
+
+      animateNumber('stat-teams', totalTeams);
+      animateNumber('stat-members', totalMembers);
+      animateNumber('stat-projects', totalProjects);
+
+      const badge = document.getElementById('team-count-badge');
+      badge.textContent = `${totalTeams} team${totalTeams !== 1 ? 's' : ''}`;
+    }
+
+    function animateNumber(id, target) {
+      const el = document.getElementById(id);
+      const current = parseInt(el.textContent) || 0;
+      if (current === target) return;
+      const step = (target - current) / 15;
+      let val = current;
+      const interval = setInterval(() => {
+        val += step;
+        el.textContent = Math.round(val);
+        if ((step > 0 && val >= target) || (step < 0 && val <= target)) {
+          el.textContent = target;
+          clearInterval(interval);
+        }
+      }, 30);
+    }
+
+    // Load all teams from API
+    async function loadTeams() {
+      try {
+        const res = await fetch(`${API}/teams`);
+        if (!res.ok) throw new Error('Failed to fetch teams');
+        teams = await res.json();
+        renderTeams();
+        updateStats();
+      } catch (err) {
+        document.getElementById('teams-container').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">⚠️</div>
+            <p>Could not load teams. Is the API running?</p>
+          </div>`;
+      }
+    }
+
+    // Format date nicely
+    function formatDate(dateStr) {
+      try {
+        return new Date(dateStr).toLocaleString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+      } catch { return dateStr; }
+    }
+
+    // Render teams to DOM
+    function renderTeams() {
+      const container = document.getElementById('teams-container');
+      if (!teams.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🏁</div>
+            <p>No teams registered yet.<br>Be the first to register!</p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = teams.map(team => `
+        <div class="team-item" id="team-${team.id}">
+          <div class="team-info">
+            <div class="team-name">🏆 ${escapeHtml(team.team_name)}</div>
+            <div class="team-members">👤 ${escapeHtml(team.members)}</div>
+            <div class="team-idea">💡 ${escapeHtml(team.project_idea)}</div>
+            <div class="team-meta">Registered: ${formatDate(team.registered_at)}</div>
+          </div>
+          <button class="btn btn-danger" onclick="deleteTeam(${team.id})" title="Remove team">🗑️</button>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+
+    // Delete a team
+    async function deleteTeam(id) {
+      const teamEl = document.getElementById(`team-${id}`);
+      if (!confirm('Are you sure you want to remove this team?')) return;
+
+      if (teamEl) {
+        teamEl.style.opacity = '0.5';
+        teamEl.style.pointerEvents = 'none';
+      }
+
+      try {
+        const res = await fetch(`${API}/teams/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Delete failed');
+        showToast('Team removed successfully', 'success');
+        await loadTeams();
+      } catch {
+        showToast('Failed to delete team', 'error');
+        if (teamEl) {
+          teamEl.style.opacity = '1';
+          teamEl.style.pointerEvents = '';
+        }
+      }
+    }
+
+    // Register a team
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const submitText = document.getElementById('submit-text');
+      btn.disabled = true;
+      submitText.textContent = 'Registering...';
+
+      const payload = {
+        team_name: document.getElementById('team-name').value.trim(),
+        members: document.getElementById('members').value.trim(),
+        project_idea: document.getElementById('project-idea').value.trim()
+      };
+
+      try {
+        const res = await fetch(`${API}/teams`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Registration failed');
+        }
+
+        showToast('🎉 Team registered successfully!', 'success');
+        document.getElementById('register-form').reset();
+        await loadTeams();
+      } catch (err) {
+        showToast(err.message || 'Registration failed', 'error');
+      } finally {
+        btn.disabled = false;
+        submitText.textContent = 'Register Team';
+      }
+    });
+
+    // Initialize
+    (async () => {
+      await checkHealth();
+      await loadTeams();
+    })();
+  </script>
+</body>
+</html>
